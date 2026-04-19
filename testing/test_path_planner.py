@@ -1,9 +1,9 @@
 import pytest
 
-from routing.Node import Node
-from routing.Edge import Edge
-from routing.EnvironmentGraph import EnvironmentGraph
-from routing.PathPlanner import PathPlanner
+from routing.node import Node
+from routing.edge import Edge
+from routing.environment_graph import EnvironmentGraph
+from routing.path_planner import PathPlanner
 
 
 def build_graph():
