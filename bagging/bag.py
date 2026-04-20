@@ -4,6 +4,7 @@ class Bag:
     def __init__(self, bagID, bagType="paper", capacity=10):
         # can adjust capacity of 10 as well
         self.bagID = bagID
+        self.name = f"Bag{bagID}"
         self.bagType = bagType  # either "paper" or "freezer"
         self.items = []
         self.current_weight = 0
