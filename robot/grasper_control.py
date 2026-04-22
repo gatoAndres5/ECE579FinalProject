@@ -4,14 +4,28 @@ class Grasper_Control:
         self.open = False
         self.position = (0, 0)
         self.handEmpty = True
+        self.itemHeld = None
 
-    def pickUp(self, item_position):
+    def pickUp(self, item, itemPosition):
         if (not self.handEmpty):
-            print("Error, hand not empty")
+            print("Error: hand not empty")
             return
-        self.position = item_position # move
-        self.closeGrasper() # grasp item
+        self.moveTo(itemPosition)
+        self.closeGrasper()
+        self.itemHeld = item
         self.handEmpty = False
+
+    def putDown(self, bagPosition):
+        if (self.handEmpty):
+            print("Error: hand empty")
+            return
+        self.moveTo(bagPosition)
+        self.openGrasper()
+        self.itemHeld = None
+        self.handEmpty = True
+
+    def moveTo(self, new_position):
+        self.position = new_position
 
     def openGrasper(self):
         self.open = True
