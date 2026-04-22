@@ -11,6 +11,14 @@ class Robot:
         self.status = "busy"
 
     def completeOrder(self):
+        if self.position != self.current_order.getDestination():
+            print("Error: robot not at destination, cannot complete order")
+            return
         self.current_order = None
         self.status = "ready"
     
+    def getStatus(self):
+        return self.status
+    
+    def getID(self):
+        return self.id
