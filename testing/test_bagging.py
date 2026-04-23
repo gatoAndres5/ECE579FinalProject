@@ -20,6 +20,23 @@ def test_bagging():
     assert bagger.bags[0].bagType == "paper"
     assert bagger.bags[1].bagType == "paper"
     assert bagger.bags[2].bagType == "freezer"
+
+def test_location():
+    order = [
+        Item(1, "1-gallon water", "large"),
+        Item(2, "1-gallon water", "large"),
+        Item(3, "pint of ice cream", "small", frozen=True),
+        Item(4, "granola box", "medium"),
+        Item(5, "loaf of bread", "medium", fragile=True)
+    ]
+    
+    bagger = Foodie_Bagger()
+    bagger.bagOrder(order)
+
+    assert len(bagger.bags) == 3
+    assert bagger.bags[0].getLocation() == (0,0);
+    assert bagger.bags[1].getLocation() == (0,0);
+    assert bagger.bags[2].getLocation() == (0,0);
     
 def test_empty_order():
     bagger = Foodie_Bagger()

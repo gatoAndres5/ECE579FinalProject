@@ -1,7 +1,7 @@
 from bagging.item import Item
 
 class Bag:
-    def __init__(self, bagID, bagType="paper", capacity=10):
+    def __init__(self, bagID, initial_location, bagType="paper", capacity=10):
         # can adjust capacity of 10 as well
         self.bagID = bagID
         self.name = f"Bag{bagID}"
@@ -9,6 +9,7 @@ class Bag:
         self.items = []
         self.current_weight = 0
         self.capacity = capacity
+        self.location = initial_location
 
         self.contains_fragile = False
         self.contains_heavy = False
@@ -42,3 +43,6 @@ class Bag:
 
     def getName(self):
         return self.name;
+
+    def getLocation(self):
+        return self.location;
