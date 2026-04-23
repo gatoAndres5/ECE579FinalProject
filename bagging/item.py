@@ -21,3 +21,9 @@ class Item:
 
     def getSize(self):
         return self.size
+    
+    def getName(self):
+        return self.name
+    
+    def getID(self):
+        return self.itemID

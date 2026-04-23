@@ -33,3 +33,12 @@ class Bag:
             self.contains_fragile = True
         if item.getSize() == 'large':
             self.contains_heavy = True
+
+    def getItems(self):
+        return self.items;
+
+    def getID(self):
+        return self.bagID;
+
+    def getName(self):
+        return self.name;
