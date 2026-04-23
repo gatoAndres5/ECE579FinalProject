@@ -22,6 +22,7 @@ class Fleet_Manager:
                 robot.assignOrder(order)
                 return robot.getID()
         print("Error: no robot available to assign order")
+        # TODO call foodie_bagger.fufillorder
         return None
 
     # where is this called from?

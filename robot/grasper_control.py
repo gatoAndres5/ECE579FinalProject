@@ -1,7 +1,8 @@
+
 class Grasper_Control:
-    def __init__(self, robot):
+    def __init__(self, robot): 
         self.robot = robot
-        self.open = False
+        self.open = True
         self.position = (0, 0)
         self.handEmpty = True
         self.itemHeld = None
@@ -10,16 +11,20 @@ class Grasper_Control:
         if (not self.handEmpty):
             print("Error: hand not empty")
             return
+        #if (item.getPosition() != itemPosition):
+        #    print("Error: item not at expected location");
         self.moveTo(itemPosition)
         self.closeGrasper()
         self.itemHeld = item
         self.handEmpty = False
 
-    def putDown(self, bagPosition):
+        print(f"Robot {self.robot.getID()}: Picked up {item.getName()}")
+
+    def putDown(self, destination):
         if (self.handEmpty):
             print("Error: hand empty")
             return
-        self.moveTo(bagPosition)
+        self.moveTo(destination)
         self.openGrasper()
         self.itemHeld = None
         self.handEmpty = True
@@ -33,3 +38,8 @@ class Grasper_Control:
     def closeGrasper(self):
         self.open = False
 
+    def isOpen(self):
+        return self.open
+    
+    def getItemHeld(self):
+        return self.itemHeld;
