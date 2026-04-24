@@ -1,9 +1,10 @@
 from bagging.bag import Bag
 
 class Foodie_Bagger:
-    def __init__(self):
+    def __init__(self, fw):
         self.bags = []
         self.next_bag_id = 1
+        self.fw_loc = fw;
 
     def bagOrder(self, order_items):
         self.bags = [] # clear order
@@ -49,7 +50,7 @@ class Foodie_Bagger:
         
         print(f"Rule R_new says: Start a new bag.")
         bag_type = "freezer" if item.isFrozen() else "paper"
-        new_bag = Bag(f"bag_{self.next_bag_id}", "FW", bagType=bag_type)
+        new_bag = Bag(f"bag_{self.next_bag_id}", self.fw_loc, bagType=bag_type)
         self.bags.append(new_bag)
         self.next_bag_id += 1
         return new_bag

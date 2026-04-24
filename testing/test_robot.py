@@ -40,17 +40,24 @@ def test_assign_order():
 
 def test_all_assigned():
     fw = Node(1, "FW", 0, 0)
+    a = Node(2, "123 Main St", 20, 10);
+    b = Node(3, "456 Elm St", 10, 20);
     fm = Fleet_Manager(fw)
     fm.addRobot()
     fm.addRobot()
-    order1 = Order(1, "123 Main St")
-    order2 = Order(2, "456 Elm St")
+    order1 = Order(1, a)
+    order2 = Order(2, b)
     fm.assignOrder(order1)
     fm.assignOrder(order2)
+
     assert fm.robots[0].getStatus() == "busy"
+    o1 = fm.robots[0].getCurrentOrder()
+    assert o1 == order1
+    assert o1.getDestination() == a
+
     assert fm.robots[1].getStatus() == "busy"
-    assert fm.robots[0].getCurrentOrder() == order1
     assert fm.robots[1].getCurrentOrder() == order2
+
     assert fm.hasAvailableRobot() == False
     order3 = Order(3, "789 Oak St")
     assert fm.assignOrder(order3) == None
