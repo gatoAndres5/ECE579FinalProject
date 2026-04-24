@@ -1,12 +1,13 @@
 from robot.robot import Robot
 
 class Fleet_Manager:
-    def __init__(self):
+    def __init__(self, fw):
         self.robots = []
         self.nextRobotID = 0 # next robot added will have this ID
+        self.fw_loc = fw
 
     def addRobot(self):
-        self.robots.append(Robot(self.nextRobotID))
+        self.robots.append(Robot(self.nextRobotID, self.fw_loc))
         self.nextRobotID += 1
 
     def hasAvailableRobot(self):

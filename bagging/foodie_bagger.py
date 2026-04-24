@@ -49,7 +49,7 @@ class Foodie_Bagger:
         
         print(f"Rule R_new says: Start a new bag.")
         bag_type = "freezer" if item.isFrozen() else "paper"
-        new_bag = Bag(f"bag_{self.next_bag_id}", (0,0), bagType=bag_type)
+        new_bag = Bag(f"bag_{self.next_bag_id}", "FW", bagType=bag_type)
         self.bags.append(new_bag)
         self.next_bag_id += 1
         return new_bag

@@ -1,12 +1,13 @@
 from robot.movement_controller import Movement_Controller
 from robot.grasper_control import Grasper_Control
 from bagging.bag import Bag
+from routing.node import Node
 
 class Robot:
-    def __init__(self, robotID):
+    def __init__(self, robotID, initial_location):
         self.id = robotID
         self.bags = []
-        self.position = (0, 0) # start position at warehouse, can change if we don't want to start at 0,0
+        self.position = initial_location # start position at warehouse, can change if we don't want to start at 0,0
         self.currentOrder = None
         self.status = "ready" # ready, busy, charging (if we implement charging stations later)
         self.movementController = Movement_Controller(self)
@@ -53,3 +54,6 @@ class Robot:
     
     def getID(self):
         return self.id
+    
+    def getLocation(self):
+        return self.position

@@ -34,9 +34,11 @@ def test_location():
     bagger.bagOrder(order)
 
     assert len(bagger.bags) == 3
-    assert bagger.bags[0].getLocation() == (0,0);
-    assert bagger.bags[1].getLocation() == (0,0);
-    assert bagger.bags[2].getLocation() == (0,0);
+    # start at FW, match node
+    # TODO change locations to Node instead of string
+    assert bagger.bags[0].getLocation() == "FW";
+    assert bagger.bags[1].getLocation() == "FW";
+    assert bagger.bags[2].getLocation() == "FW";
     
 def test_empty_order():
     bagger = Foodie_Bagger()

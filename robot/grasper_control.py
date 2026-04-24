@@ -3,7 +3,7 @@ class Grasper_Control:
     def __init__(self, robot): 
         self.robot = robot
         self.open = True
-        self.position = (0, 0)
+        self.position = (0, 0) # not a Node
         self.handEmpty = True
         self.itemHeld = None
 

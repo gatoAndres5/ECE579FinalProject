@@ -1,4 +1,5 @@
 from bagging.item import Item
+from routing.node import Node
 
 class Bag:
     def __init__(self, bagID, initial_location, bagType="paper", capacity=10):
