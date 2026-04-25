@@ -4,13 +4,15 @@ from bagging.bag import Bag
 from routing.node import Node
 
 class Robot:
-    def __init__(self, robotID, initial_location):
+    def __init__(self, fm, robotID, initial_location, environment_graph, true_obstacles):
+        self.fm = fm
         self.id = robotID
         self.bags = []
         self.position = initial_location # start position at warehouse, can change if we don't want to start at 0,0
         self.currentOrder = None
         self.status = "ready" # ready, busy, charging (if we implement charging stations later)
-        self.movementController = Movement_Controller(self)
+        self.eg = environment_graph
+        self.movementController = Movement_Controller(self, environment_graph, true_obstacles)
         self.grasper = Grasper_Control(self) 
         self.maxCapacity = 6 # max number of bags
 
@@ -31,13 +33,11 @@ class Robot:
         print(f"Robot {self.id}: added bag {bag.getID()}")
 
     def removeBag(self, bag, location):
-        # TODO fix location and decide relative or absolute
         self.grasper.pickUp(bag, self.position)
         self.grasper.putDown(bag, location)
         self.bags.remove(bag)
 
-
-    def removeAll(self, location):
+    def removeAllBags(self, location):
         # remove all bags, placing at location
         for b in self.bags:
             self.removeBag(b, location);
@@ -57,3 +57,17 @@ class Robot:
     
     def getLocation(self):
         return self.position
+    
+    def tick(self):
+        if self.status == "busy":
+            movementStatus = self.movementController.step()
+
+            if movementStatus == "COMPLETE":
+                # arrived at destination
+                self.removeAllBags(self.movementController.destinationNode)
+                self.fm.completeOrder(self.id) # notify FleetManager order is complete
+            elif movementStatus == "FAIL":
+                self.status = "error"
+                print(f"Error: robot {self.id} in an error state.")
+            elif movementStatus == "MOVING":
+                return # do nothing
