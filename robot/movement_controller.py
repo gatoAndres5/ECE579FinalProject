@@ -8,6 +8,7 @@ class Movement_Controller:
         self.obstacleSensor = ObstacleDetection(obstacles=true_obstacles) # TODO need to pass true list of obstacles
         self.distanceTravelled = 0
         self.destinationNode = None
+        self.currentPath = None
 
     # TODO we will need to adjust pathplanner to plan for multiple order deliveries in a single robot
     # for now assume one delivery per robot to test simulation and Robot classes
@@ -24,10 +25,11 @@ class Movement_Controller:
         
         # calculate path
         path = self.planner.calculate_path(self.robot.getPosition(), destination)
+        self.currentPath = path
 
         if not path:
             print(f"Error: robot {self.robot.getID()} failed to find a path to {destination.name}")
-            return "FAIL"
+            return False
         return True
     
     def step(self):
