@@ -55,7 +55,7 @@ class Robot:
     def getID(self):
         return self.id
     
-    def getLocation(self):
+    def getPosition(self):
         return self.position
     
     def tick(self):
@@ -66,6 +66,7 @@ class Robot:
                 # arrived at destination
                 self.removeAllBags(self.movementController.destinationNode)
                 self.fm.completeOrder(self.id) # notify FleetManager order is complete
+                # TODO move back to fw
             elif movementStatus == "FAIL":
                 self.status = "error"
                 print(f"Error: robot {self.id} in an error state.")
