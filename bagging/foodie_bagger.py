@@ -6,11 +6,17 @@ class Foodie_Bagger:
         self.next_bag_id = 1
         self.fw_loc = fw;
 
-    def bagOrder(self, order_items):
+    def bagOrder(self, order):
         self.bags = [] # clear order
-        large_items = [i for i in order_items if i.getSize() == 'large']
-        medium_items = [i for i in order_items if i.getSize() == 'medium']
-        small_items = [i for i in order_items if i.getSize() == 'small']
+
+        if (order is None):
+            return None
+
+        items = order.getItems()
+
+        large_items = [i for i in items if i.getSize() == 'large']
+        medium_items = [i for i in items if i.getSize() == 'medium']
+        small_items = [i for i in items if i.getSize() == 'small']
 
         if large_items:
             print("Rule R_large says: Bag large items.")
