@@ -2,11 +2,13 @@ import pytest
 
 from robot.robot import Robot
 from bagging.bag import Bag
+from bagging.item import Item
 from robot.fleet_manager import Fleet_Manager
 from order.order import Order
 from routing.node import Node
 from routing.edge import Edge
 from routing.environment_graph import EnvironmentGraph
+from bagging.foodie_bagger import Foodie_Bagger
 
 # Fleet Manager 
 
@@ -40,12 +42,16 @@ def build_graph():
 def test_fleet_manager_init():
     eg, n, e = build_graph()
     fw = n[0]
-    fm = Fleet_Manager(fw, eg, )
+    true_obstacles = None
+    fm = Fleet_Manager(fw, eg, true_obstacles)
     assert len(fm.robots) == 0
+    assert fm.eg == eg
 
 def test_add_robot():
-    fw = Node(1, "FW", 0, 0)
-    fm = Fleet_Manager(fw)
+    eg, n, e = build_graph()
+    fw = n[0]
+    true_obstacles = None
+    fm = Fleet_Manager(fw, eg, true_obstacles)
     fm.addRobot()
     fm.addRobot()
     assert len(fm.robots) == 2
@@ -53,15 +59,27 @@ def test_add_robot():
     assert fm.robots[1].getID() == 1
     for robot in fm.robots:
         assert robot.getStatus() == "ready"
+        assert robot.getPosition() == fw
     assert fm.hasAvailableRobot() == True
 
 def test_assign_order():
-    fw = Node(1, "FW", 0, 0)
-    fm = Fleet_Manager(fw)
+    eg, n, e = build_graph()
+    fw = n[0]
+    true_obstacles = None
+    fm = Fleet_Manager(fw, eg, true_obstacles)
     fm.addRobot()
     fm.addRobot()
-    order = Order(1, "123 Main St")
-    assigned_robot_id = fm.assignOrder(order)
+
+    items = [
+        Item(1, "fragile item", "small", fragile=True),
+        Item(2, "heavy item", "large")
+    ]
+    order = Order(1, "123 Main St", items)
+    bagger = Foodie_Bagger(fw)
+    bags = bagger.bagOrder(order)
+    assert bags is not None
+
+    assigned_robot_id = fm.dispatchRobot(order, bags)
     assert assigned_robot_id == 0
     assert fm.robots[0].getCurrentOrder() == order
     assert fm.robots[0].getStatus() == "busy"
@@ -69,16 +87,19 @@ def test_assign_order():
     assert fm.robots[0].completeOrder() == None # not yet at destination
 
 def test_all_assigned():
-    fw = Node(1, "FW", 0, 0)
-    a = Node(2, "123 Main St", 20, 10);
-    b = Node(3, "456 Elm St", 10, 20);
-    fm = Fleet_Manager(fw)
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    fm = Fleet_Manager(fw, eg, true_obstacles)
     fm.addRobot()
     fm.addRobot()
     order1 = Order(1, a)
     order2 = Order(2, b)
-    fm.assignOrder(order1)
-    fm.assignOrder(order2)
+
+    fm.dispatchOrder(order1)
+    fm.dispatchOrder(order2)
 
     assert fm.robots[0].getStatus() == "busy"
     o1 = fm.robots[0].getCurrentOrder()
@@ -97,10 +118,16 @@ def test_all_assigned():
 # Robot 
 
 def test_robot_init():
-    fw = Node(1, "FW", 0, 0)
-    r = Robot(10324, fw)
-    assert r.getCurrentOrder() == None;
-    assert r.getLocation() == fw
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    fm = Fleet_Manager(fw, eg, true_obstacles)
+
+    r = Robot(fm, 10324, fw, eg, true_obstacles)
+    assert r.getCurrentOrder() == None
+    assert r.getPosition() == fw
     assert len(r.bags) == 0
     assert r.status == "ready"
 
@@ -117,6 +144,18 @@ def test_grasper():
 def test():
     assert 0 == "TODO call foodie_bagger.fufillorder"
 
+# Movement
+
+def test_move():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    fm = Fleet_Manager(fw, eg, true_obstacles)
+
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    robot.movementController.setDestination()
 
 # test robot movement; leave simulation for now
 # create fleetmanager, robots, give them destinations
