@@ -21,6 +21,9 @@ class Robot:
         self.currentOrder = order
         self.status = "busy"
 
+    def setDestination(self, destination):
+        self.movementController.setDestination(destination)
+
     def getCurrentOrder(self):
         return self.currentOrder;
 
@@ -29,13 +32,13 @@ class Robot:
             print(f"Error: no room to add another bag.")
             return;
         self.grasper.pickUp(bag, location)
-        self.grasper.putDown(bag, self.position)
+        self.grasper.putDown(self.position)
         self.bags.append(bag);
         print(f"Robot {self.id}: added bag {bag.getID()}")
 
     def removeBag(self, bag, location):
         self.grasper.pickUp(bag, self.position)
-        self.grasper.putDown(bag, location)
+        self.grasper.putDown(location)
         self.bags.remove(bag)
 
     def removeAllBags(self, location):

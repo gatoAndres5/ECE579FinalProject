@@ -65,6 +65,7 @@ def test_add_robot():
 
 def test_assign_order():
     eg, n, e = build_graph()
+    b = n[2]
     fw = n[0]
     true_obstacles = None
     fm = Fleet_Manager(fw, eg, true_obstacles)
@@ -75,7 +76,7 @@ def test_assign_order():
         Item(1, "fragile item", "small", fragile=True),
         Item(2, "heavy item", "large")
     ]
-    order = Order(1, "123 Main St", items)
+    order = Order(1, b, items)
     bagger = Foodie_Bagger(fw)
     bags = bagger.bagOrder(order)
     assert bags is not None
