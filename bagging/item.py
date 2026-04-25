@@ -1,7 +1,7 @@
 class Item:
     def __init__(self, itemID, name, size, frozen=False, fragile=False):
         self.itemID = itemID
-        self.name = f"{name}_{itemID}"
+        self.name = f"{name}_{itemID}_{size}"
         self.size = size  # string: 'large', 'medium', 'small'
         self.frozen = frozen 
         self.fragile = fragile
@@ -21,3 +21,9 @@ class Item:
 
     def getSize(self):
         return self.size
+    
+    def getName(self):
+        return self.name
+    
+    def getID(self):
+        return self.itemID
