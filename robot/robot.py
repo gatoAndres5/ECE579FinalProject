@@ -15,6 +15,7 @@ class Robot:
         self.movementController = Movement_Controller(self, environment_graph, true_obstacles)
         self.grasper = Grasper_Control(self) 
         self.maxCapacity = 6 # max number of bags
+        self.movementStatus = None
 
     def assignOrder(self, order):
         self.currentOrder = order
@@ -61,14 +62,25 @@ class Robot:
     def tick(self):
         if self.status == "busy":
             movementStatus = self.movementController.step()
+            self.movementStatus = movementStatus
 
-            if movementStatus == "COMPLETE":
+            if movementStatus == "COMPLETE": #and self.position == self.currentOrder.getDestination():
                 # arrived at destination
+                print(f"Robot {self.id}: movement complete. Returning to FW.")
                 self.removeAllBags(self.movementController.destinationNode)
-                self.fm.completeOrder(self.id) # notify FleetManager order is complete
-                # TODO move back to fw
+
+                if self.position == self.currentOrder.getDestination():
+                    self.movementController.setDestination(self.fm.fw) # send robot back to FW
+                elif self.position == self.fm.fw:
+                    self.fm.completeOrder(self.id) # notify FleetManager order is complete
+                    self.status = 'ready'
             elif movementStatus == "FAIL":
                 self.status = "error"
                 print(f"Error: robot {self.id} in an error state.")
             elif movementStatus == "MOVING":
                 return # do nothing
+        elif self.status == 'ready':
+            print(f"Robot {self.id}: ready")
+
+        elif self.status == 'charging':
+            print(f"Robot {self.id}: charging")
