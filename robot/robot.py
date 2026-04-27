@@ -41,16 +41,17 @@ class Robot:
         self.grasper.pickUp(bag, self.position)
         self.grasper.putDown(location)
         self.bags.remove(bag)
+        print(f"Robot {self.id} removed {bag.getName()}")
 
     def removeAllBags(self, location, order=None):
-        # remove all bags, placing at location
-        if order is not None:
-            for b in self.bags:
+        # if an order is specified, remove only those bags
+        for b in self.bags[:]:
+            if order:
                 if b.order == order:
                     self.removeBag(b, location)
-    
-        for b in self.bags:
-            self.removeBag(b, location);
+            else:
+                self.removeBag(b, location)
+        return
 
     def completeOrder(self):
         if self.position != self.currentOrder.getDestination():
@@ -84,27 +85,40 @@ class Robot:
     def tick(self):
         if self.status == "busy":
             movementStatus = self.movementController.step()
-            self.drainBattery(1)
             self.movementStatus = movementStatus
+            self.drainBattery(1)
 
             if movementStatus == "COMPLETE": #and self.position == self.currentOrder.getDestination():
                 # arrived at destination
-                print(f"Robot {self.id}: movement complete. Returning to FW.")
-                self.removeAllBags(self.movementController.destinationNode)
-
                 if self.position == self.currentOrder.getDestination():
-                    self.movementController.setDestination(self.fm.fw) # send robot back to FW
+                    print(f"Robot {self.id}: movement complete. Returning to FW.")
+                    self.removeAllBags(self.movementController.destinationNode)
+                    # send robot back to FW
+                    self.movementController.setDestination(self.fm.fw) 
                 elif self.position == self.fm.fw:
+                    print(f"Robot {self.id} returned to FW")
                     self.fm.completeOrder(self.id) # notify FleetManager order is complete
-                    self.status = 'ready'
+
+                    if self.battery < 30:
+                        print(f"Robot {self.id} began charging.")
+                        self.status = "charging"
+                    else:
+                        self.status = 'ready'
+                    
             elif movementStatus == "FAIL":
                 self.status = "error"
                 print(f"Error: robot {self.id} in an error state.")
             elif movementStatus == "MOVING":
+                if self.battery <= 0:
+                    print(f"Error: robot {self.id} battery died.")
+                    self.status = "dead"
                 return # do nothing
-        elif self.status == 'ready':
+            
+        elif self.status == "ready":
             print(f"Robot {self.id}: ready")
 
-        elif self.status == 'charging':
-            print(f"Robot {self.id}: charging")
-            self.chargeBattery(1)
+        elif self.status == "charging":
+            print(f"Robot {self.id}: charging ({self.battery}%)")
+            self.chargeBattery(5)
+            if self.battery >= 100:
+                self.status = "ready"

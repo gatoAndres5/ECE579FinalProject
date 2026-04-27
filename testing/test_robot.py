@@ -196,6 +196,7 @@ def test_move():
     fm.addRobot(robot)
     fm.dispatchOrder(order, bags1)
     assert robot.getCurrentOrder() == order
+    assert len(robot.bags) == 2
     assert robot.getBattery() == 100
     assert fm.calculatePathCost([fw, a]) == 1
 
@@ -206,11 +207,13 @@ def test_move():
 
     #robot.status = 'busy' # manually set to busy since testing w/o an order
     assert robot.getStatus() == 'busy'
+    assert len(robot.bags) == 2
 
     robot.tick()
     assert robot.getPosition() == a
     assert robot.movementController.getDestination() == fw
     assert robot.getBattery() == 99
+    assert len(robot.bags) == 0
 
     robot.tick() # move back to FW
     print(f"Pos: {robot.position.name}")
@@ -275,3 +278,68 @@ def test_battery_empty():
     robot2 = Robot(fm, 2, fw, eg, true_obstacles)
     fm.addRobot(robot2)
     assert fm.dispatchOrder(order, bags1) == robot2
+
+def test_charging():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    robot.battery = 90
+    robot.status = "charging"
+
+    robot.tick()
+    assert robot.getBattery() == 95
+
+    robot.tick()
+    assert robot.getBattery() >= 100
+    assert robot.getStatus() == "ready"
+
+def dead():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+
+    items1 = [
+        Item(1, "fragile item", "small", fragile=True),
+        Item(2, "heavy item", "large")
+    ]
+    order = Order(1, a, items1)
+    bagger = Foodie_Bagger(fw)
+    bags1 = bagger.bagOrder(order)
+    assert bags1 is not None
+
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    fm.addRobot(robot)
+    fm.dispatchOrder(order, bags1)
+    assert robot.getCurrentOrder() == order
+    assert robot.getBattery() == 100
+    assert fm.calculatePathCost([fw, a]) == 1
+
+    assert robot.getPosition() == fw
+    assert robot.movementController.setDestination(a)
+    assert robot.movementController.getDestination() == a
+    assert robot.getPosition() == fw
+
+    assert robot.getStatus() == 'busy'
+
+    robot.tick()
+    assert robot.getPosition() == a
+    assert robot.movementController.getDestination() == fw
+    assert robot.getBattery() == 99
+
+    robot.battery = 0
+    robot.tick()
+    assert robot.getStatus() == "dead"
+
+
+# TODO if robots at foodiewarehouse and low battery below some point
+# set status to charging
+# in main simulation loop, all robots should call tick() 
