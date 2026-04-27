@@ -9,6 +9,7 @@ from routing.node import Node
 from routing.edge import Edge
 from routing.environment_graph import EnvironmentGraph
 from bagging.foodie_bagger import Foodie_Bagger
+from routing.path_planner import PathPlanner
 
 # Fleet Manager 
 
@@ -31,9 +32,13 @@ def build_graph():
     e2 = Edge(2, 1, a, b, True)
     e3 = Edge(3, 2, fw, c, True)
     e4 = Edge(4, 1, c, b, True)
-    e5 = Edge(5, 1, a, fw, True)
 
-    edges = [e1, e2, e3, e4, e5]
+    e5 = Edge(5, 1, a, fw, True)
+    e6 = Edge(6, 1, b, a, True)
+    e7 = Edge(7, 2, c, fw, True)
+    e8 = Edge(8, 1, b, c, True)
+
+    edges = [e1, e2, e3, e4, e5, e6, e7, e8]
 
     for edge in edges:
         graph.addEdge(edge)
@@ -44,7 +49,8 @@ def test_fleet_manager_init():
     eg, n, e = build_graph()
     fw = n[0]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
     assert len(fm.robots) == 0
     assert fm.eg == eg
 
@@ -52,13 +58,15 @@ def test_add_robot():
     eg, n, e = build_graph()
     fw = n[0]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
     fm.addRobot()
     fm.addRobot()
     assert len(fm.robots) == 2
     assert fm.robots[0].getID() == 0
     assert fm.robots[1].getID() == 1
     for robot in fm.robots:
+        assert robot.getBattery() == 100 # fully charged
         assert robot.getStatus() == "ready"
         assert robot.getPosition() == fw
     assert fm.hasAvailableRobot() == True
@@ -68,7 +76,8 @@ def test_assign_order():
     b = n[2]
     fw = n[0]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
     fm.addRobot()
     fm.addRobot()
 
@@ -94,7 +103,8 @@ def test_all_assigned():
     a = n[1]
     b = n[2]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
     fm.addRobot()
     fm.addRobot()
     items1 = [
@@ -139,7 +149,8 @@ def test_robot_init():
     a = n[1]
     b = n[2]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
 
     r = Robot(fm, 10324, fw, eg, true_obstacles)
     assert r.getCurrentOrder() == None
@@ -151,7 +162,8 @@ def test_grasper():
     eg, n, e = build_graph()
     fw = n[0]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
     r = Robot(fm, 0, fw, eg, true_obstacles)
     assert r.grasper.isOpen()
     r.grasper.openGrasper()
@@ -168,29 +180,166 @@ def test_move():
     a = n[1]
     b = n[2]
     true_obstacles = None
-    fm = Fleet_Manager(fw, eg, true_obstacles)
-    order = Order(1, a, None)
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+
+    items1 = [
+        Item(1, "fragile item", "small", fragile=True),
+        Item(2, "heavy item", "large")
+    ]
+    order = Order(1, a, items1)
+    bagger = Foodie_Bagger(fw)
+    bags1 = bagger.bagOrder(order)
+    assert bags1 is not None
 
     robot = Robot(fm, 1, fw, eg, true_obstacles)
     fm.addRobot(robot)
-    fm.dispatchOrder(order, None)
+    fm.dispatchOrder(order, bags1)
     assert robot.getCurrentOrder() == order
+    assert len(robot.bags) == 2
+    assert robot.getBattery() == 100
+    assert fm.calculatePathCost([fw, a]) == 1
 
     assert robot.getPosition() == fw
     assert robot.movementController.setDestination(a)
     assert robot.movementController.getDestination() == a
     assert robot.getPosition() == fw
 
-    robot.status = 'busy' # manually set to busy since testing w/o an order
+    #robot.status = 'busy' # manually set to busy since testing w/o an order
+    assert robot.getStatus() == 'busy'
+    assert len(robot.bags) == 2
+
+    robot.tick()
+    assert robot.getPosition() == a
+    assert robot.movementController.getDestination() == fw
+    assert robot.getBattery() == 99
+    assert len(robot.bags) == 0
+
+    robot.tick() # move back to FW
+    print(f"Pos: {robot.position.name}")
+    assert robot.getPosition() == fw
+    assert robot.getBattery() == 98
+
+    robot.tick()
+    assert robot.status == 'ready'
+
+def test_bag_space():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+
+    items1 = [
+        Item(1, "fragile item", "small", fragile=True),
+        Item(2, "heavy item", "large")
+    ]
+    order = Order(1, a, items1)
+    bagger = Foodie_Bagger(fw)
+    bags1 = bagger.bagOrder(order)
+    assert bags1 is not None
+
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    fm.addRobot(robot)
+    robot.bags = [None, None, None, None, None, None]
+    # no space; cannot assign
+    assert fm.dispatchOrder(order, bags1) is None
+
+    robot2 = Robot(fm, 2, fw, eg, true_obstacles)
+    fm.addRobot(robot2)
+    assert fm.dispatchOrder(order, bags1) == robot2
+
+def test_battery_empty():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+
+    items1 = [
+        Item(1, "fragile item", "small", fragile=True),
+        Item(2, "heavy item", "large")
+    ]
+    order = Order(1, a, items1)
+    bagger = Foodie_Bagger(fw)
+    bags1 = bagger.bagOrder(order)
+    assert bags1 is not None
+
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    fm.addRobot(robot)
+    robot.battery = 1
+    assert fm.dispatchOrder(order, bags1) is None
+    # cannot dispatch; battery too low
+
+    robot2 = Robot(fm, 2, fw, eg, true_obstacles)
+    fm.addRobot(robot2)
+    assert fm.dispatchOrder(order, bags1) == robot2
+
+def test_charging():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    robot.battery = 90
+    robot.status = "charging"
+
+    robot.tick()
+    assert robot.getBattery() == 95
+
+    robot.tick()
+    assert robot.getBattery() >= 100
+    assert robot.getStatus() == "ready"
+
+def dead():
+    eg, n, e = build_graph()
+    fw = n[0]
+    a = n[1]
+    b = n[2]
+    true_obstacles = None
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+
+    items1 = [
+        Item(1, "fragile item", "small", fragile=True),
+        Item(2, "heavy item", "large")
+    ]
+    order = Order(1, a, items1)
+    bagger = Foodie_Bagger(fw)
+    bags1 = bagger.bagOrder(order)
+    assert bags1 is not None
+
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    fm.addRobot(robot)
+    fm.dispatchOrder(order, bags1)
+    assert robot.getCurrentOrder() == order
+    assert robot.getBattery() == 100
+    assert fm.calculatePathCost([fw, a]) == 1
+
+    assert robot.getPosition() == fw
+    assert robot.movementController.setDestination(a)
+    assert robot.movementController.getDestination() == a
+    assert robot.getPosition() == fw
+
     assert robot.getStatus() == 'busy'
 
     robot.tick()
     assert robot.getPosition() == a
     assert robot.movementController.getDestination() == fw
+    assert robot.getBattery() == 99
 
-    robot.tick() # move back to FW
-    print(f"Pos: {robot.position.name}")
-    assert robot.getPosition() == fw
-
+    robot.battery = 0
     robot.tick()
-    assert robot.status == 'ready'
+    assert robot.getStatus() == "dead"
+
+
+# TODO if robots at foodiewarehouse and low battery below some point
+# set status to charging
+# in main simulation loop, all robots should call tick() 
