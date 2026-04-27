@@ -16,6 +16,7 @@ class Robot:
         self.grasper = Grasper_Control(self) 
         self.maxCapacity = 6 # max number of bags
         self.movementStatus = None
+        self.battery = 100 # start fully charged
 
     def assignOrder(self, order):
         self.currentOrder = order
@@ -41,8 +42,13 @@ class Robot:
         self.grasper.putDown(location)
         self.bags.remove(bag)
 
-    def removeAllBags(self, location):
+    def removeAllBags(self, location, order=None):
         # remove all bags, placing at location
+        if order is not None:
+            for b in self.bags:
+                if b.order == order:
+                    self.removeBag(b, location)
+    
         for b in self.bags:
             self.removeBag(b, location);
 
@@ -59,12 +65,26 @@ class Robot:
     def getID(self):
         return self.id
     
+    def getCapacity(self):
+        return self.maxCapacity
+    
     def getPosition(self):
         return self.position
+    
+    def drainBattery(self, distance):
+        # battery drains by 1% per distance travelled
+        self.battery -= distance
+
+    def chargeBattery(self, percent):
+        self.battery += percent
+
+    def getBattery(self):
+        return self.battery
     
     def tick(self):
         if self.status == "busy":
             movementStatus = self.movementController.step()
+            self.drainBattery(1)
             self.movementStatus = movementStatus
 
             if movementStatus == "COMPLETE": #and self.position == self.currentOrder.getDestination():
@@ -87,3 +107,4 @@ class Robot:
 
         elif self.status == 'charging':
             print(f"Robot {self.id}: charging")
+            self.chargeBattery(1)
