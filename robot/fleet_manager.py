@@ -109,13 +109,6 @@ class Fleet_Manager:
                 break
 
     # TODO multiple orders
-    # (maintain a list of destinations, instead of just one)
     # check capacity - can these orders fit
     # but don't want to assign and keep a robot waiting
     # given a set of orders (in ordermanager) how to optimize which orders go to which robot
-
-    # TODO recharging
-    # robots also need to recharge
-    # deplete battery percentage per unit distance
-    # when battery below a threshold, cannot be dispatched (need to return to FW?)
-    # need to charge for a certain time
