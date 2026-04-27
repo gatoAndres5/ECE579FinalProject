@@ -35,13 +35,13 @@ class Robot:
         self.grasper.pickUp(bag, location)
         self.grasper.putDown(self.position)
         self.bags.append(bag);
-        print(f"Robot {self.id}: added bag {bag.getID()}")
+        print(f"Robot {self.id}: added {bag.getID()} to inventory")
 
     def removeBag(self, bag, location):
         self.grasper.pickUp(bag, self.position)
         self.grasper.putDown(location)
         self.bags.remove(bag)
-        print(f"Robot {self.id} removed {bag.getName()}")
+        print(f"Robot {self.id}: removed {bag.getName()} from inventory")
 
     def removeAllBags(self, location, order=None):
         # if an order is specified, remove only those bags
@@ -54,11 +54,13 @@ class Robot:
         return
 
     def completeOrder(self):
-        if self.position != self.currentOrder.getDestination():
-            print("Error: robot not at destination, cannot complete order")
-            return
         self.currentOrder = None
-        self.status = "ready"
+
+        if self.battery < 30:
+            print(f"Robot {self.id} began charging.")
+            self.status = "charging"
+        else:
+            self.status = "ready"
     
     def getStatus(self):
         return self.status
@@ -90,20 +92,21 @@ class Robot:
 
             if movementStatus == "COMPLETE": #and self.position == self.currentOrder.getDestination():
                 # arrived at destination
-                if self.position == self.currentOrder.getDestination():
-                    print(f"Robot {self.id}: movement complete. Returning to FW.")
-                    self.removeAllBags(self.movementController.destinationNode)
-                    # send robot back to FW
-                    self.movementController.setDestination(self.fm.fw) 
+                currOrder = self.movementController.currentTargetOrder
+
+                if currOrder and self.position == currOrder.getDestination():
+                    print(f"Robot {self.id}: movement complete to {self.position.name}.")
+                    self.removeAllBags(self.movementController.destinationNode, currOrder)
+
+                    # target the next destination
+                    self.movementController.targetNextDestination()
                 elif self.position == self.fm.fw:
+                    # returned to FW
                     print(f"Robot {self.id} returned to FW")
                     self.fm.completeOrder(self.id) # notify FleetManager order is complete
-
-                    if self.battery < 30:
-                        print(f"Robot {self.id} began charging.")
-                        self.status = "charging"
-                    else:
-                        self.status = 'ready'
+                else:
+                    self.removeAllBags(self.movementController.destinationNode)
+                    self.movementController.targetNextDestination()
                     
             elif movementStatus == "FAIL":
                 self.status = "error"
@@ -122,3 +125,4 @@ class Robot:
             self.chargeBattery(5)
             if self.battery >= 100:
                 self.status = "ready"
+
