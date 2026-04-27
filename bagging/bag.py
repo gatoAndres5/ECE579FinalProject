@@ -2,12 +2,13 @@ from bagging.item import Item
 from routing.node import Node
 
 class Bag:
-    def __init__(self, bagID, initial_location, bagType="paper", capacity=10):
+    def __init__(self, bagID, initial_location, order, bagType="paper", capacity=10):
         # can adjust capacity of 10 as well
         self.bagID = bagID
         self.name = f"Bag{bagID}"
         self.bagType = bagType  # either "paper" or "freezer"
         self.items = []
+        self.order = order
         self.current_weight = 0
         self.capacity = capacity
         self.location = initial_location
@@ -37,13 +38,16 @@ class Bag:
             self.contains_heavy = True
 
     def getItems(self):
-        return self.items;
+        return self.items
 
     def getID(self):
-        return self.bagID;
+        return self.bagID
 
     def getName(self):
-        return self.name;
+        return self.name
 
     def getLocation(self):
-        return self.location;
+        return self.location
+
+    def getOrder(self):
+        return self.order
