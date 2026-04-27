@@ -32,21 +32,6 @@ class Fleet_Manager:
             if robot.getStatus() == "ready":
                 return robot
         return None
-    
-    def calculatePathCost(self, path):
-        if not path or len(path) < 2:
-            return 0
-            
-        total_cost = 0
-        for i in range(len(path) - 1):
-            current_node = path[i]
-            next_node = path[i + 1]
-            for edge in current_node.edges:
-                if edge.destNode == next_node:
-                    total_cost += edge.cost
-                    break
-                    
-        return total_cost
 
     # dispatch an order, given bags from FoodieBagger
     def dispatchOrder(self, order, bags):
@@ -63,12 +48,12 @@ class Fleet_Manager:
                 path_out = self.planner.calculate_path(self.fw, destination)
                 if not path_out:
                     continue
-                cost_out = self.calculatePathCost(path_out)
+                cost_out = self.planner.calculatePathCost(path_out)
 
                 path_back = self.planner.calculate_path(destination, self.fw)
                 if not path_back:
                     continue
-                cost_back = self.calculatePathCost(path_back)
+                cost_back = self.planner.calculatePathCost(path_back)
 
                 total_min_cost = cost_out + cost_back
                 min_battery = total_min_cost * 1

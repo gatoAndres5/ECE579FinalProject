@@ -198,7 +198,7 @@ def test_move():
     assert robot.getCurrentOrder() == order
     assert len(robot.bags) == 2
     assert robot.getBattery() == 100
-    assert fm.calculatePathCost([fw, a]) == 1
+    assert pathplanner.calculatePathCost([fw, a]) == 1
 
     assert robot.getPosition() == fw
     assert robot.movementController.setDestination(a)
