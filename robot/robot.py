@@ -8,9 +8,9 @@ class Robot:
         self.fm = fm
         self.id = robotID
         self.bags = []
-        self.position = initial_location # start position at warehouse, can change if we don't want to start at 0,0
+        self.position = initial_location
         self.currentOrder = None
-        self.status = "ready" # ready, busy, charging (if we implement charging stations later)
+        self.status = "ready"
         self.eg = environment_graph
         self.movementController = Movement_Controller(self, environment_graph, true_obstacles)
         self.grasper = Grasper_Control(self) 
@@ -75,8 +75,9 @@ class Robot:
         return self.position
     
     def drainBattery(self, distance):
-        # battery drains by 1% per distance travelled
-        self.battery -= distance
+        # battery drains by drain_rate% per distance travelled
+        drain_rate = 1
+        self.battery -= distance * drain_rate
 
     def chargeBattery(self, percent):
         self.battery += percent
@@ -90,14 +91,13 @@ class Robot:
             self.movementStatus = movementStatus
             self.drainBattery(1)
 
-            if movementStatus == "COMPLETE": #and self.position == self.currentOrder.getDestination():
+            if movementStatus == "COMPLETE":
                 # arrived at destination
                 currOrder = self.movementController.currentTargetOrder
 
                 if currOrder and self.position == currOrder.getDestination():
                     print(f"Robot {self.id}: movement complete to {self.position.name}.")
                     self.removeAllBags(self.movementController.destinationNode, currOrder)
-
                     # target the next destination
                     self.movementController.targetNextDestination()
                 elif self.position == self.fm.fw:
@@ -115,8 +115,6 @@ class Robot:
                 if self.battery <= 0:
                     print(f"Error: robot {self.id} battery died.")
                     self.status = "dead"
-                return # do nothing
-            
         elif self.status == "ready":
             print(f"Robot {self.id}: ready")
 

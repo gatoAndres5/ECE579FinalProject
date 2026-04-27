@@ -19,7 +19,8 @@ class Movement_Controller:
         self.targetNextDestination()
 
     def optimizeItinerary(self, orders):
-        # Used AI tools to help implement the code for a greedy nearest-neighbor algorithm to optimize an order itinerary
+        # Used AI tools to help implement the code for a greedy nearest-neighbor algorithm to optimize an order 
+        # itinerary
         unvisited = orders[:]
         currentNode = self.robot.getPosition()
         optimizedQueue = []
@@ -128,7 +129,5 @@ class Movement_Controller:
         if self.robot.position == self.destinationNode:
             # arrived at destination
             print(f"Robot {self.robot.getID()} arrived at destination {self.destinationNode.name}")
-            #self.destinationNode == None
             return "COMPLETE"
-        
         return "MOVING"

@@ -369,6 +369,7 @@ def dead():
     robot.battery = 0
     robot.tick()
     assert robot.getStatus() == "dead"
+    assert robot.getPosition() == a
 
 # in main simulation loop, all robots should call tick() to synchronize in time
 
