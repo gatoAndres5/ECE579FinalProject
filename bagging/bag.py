@@ -51,3 +51,6 @@ class Bag:
 
     def getOrder(self):
         return self.order
+    
+    def getBagType(self):
+        return self.bagType
