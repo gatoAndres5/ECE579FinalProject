@@ -8,9 +8,9 @@ class Robot:
         self.fm = fm
         self.id = robotID
         self.bags = []
-        self.position = initial_location # start position at warehouse, can change if we don't want to start at 0,0
+        self.position = initial_location
         self.currentOrder = None
-        self.status = "ready" # ready, busy, charging (if we implement charging stations later)
+        self.status = "ready"
         self.eg = environment_graph
         self.movementController = Movement_Controller(self, environment_graph, true_obstacles)
         self.grasper = Grasper_Control(self) 
@@ -35,13 +35,13 @@ class Robot:
         self.grasper.pickUp(bag, location)
         self.grasper.putDown(self.position)
         self.bags.append(bag);
-        print(f"Robot {self.id}: added bag {bag.getID()}")
+        print(f"Robot {self.id}: added {bag.getID()} to inventory")
 
     def removeBag(self, bag, location):
         self.grasper.pickUp(bag, self.position)
         self.grasper.putDown(location)
         self.bags.remove(bag)
-        print(f"Robot {self.id} removed {bag.getName()}")
+        print(f"Robot {self.id}: removed {bag.getName()} from inventory")
 
     def removeAllBags(self, location, order=None):
         # if an order is specified, remove only those bags
@@ -54,11 +54,13 @@ class Robot:
         return
 
     def completeOrder(self):
-        if self.position != self.currentOrder.getDestination():
-            print("Error: robot not at destination, cannot complete order")
-            return
         self.currentOrder = None
-        self.status = "ready"
+
+        if self.battery < 30:
+            print(f"Robot {self.id} began charging.")
+            self.status = "charging"
+        else:
+            self.status = "ready"
     
     def getStatus(self):
         return self.status
@@ -73,8 +75,9 @@ class Robot:
         return self.position
     
     def drainBattery(self, distance):
-        # battery drains by 1% per distance travelled
-        self.battery -= distance
+        # battery drains by drain_rate% per distance travelled
+        drain_rate = 1
+        self.battery -= distance * drain_rate
 
     def chargeBattery(self, percent):
         self.battery += percent
@@ -88,22 +91,22 @@ class Robot:
             self.movementStatus = movementStatus
             self.drainBattery(1)
 
-            if movementStatus == "COMPLETE": #and self.position == self.currentOrder.getDestination():
+            if movementStatus == "COMPLETE":
                 # arrived at destination
-                if self.position == self.currentOrder.getDestination():
-                    print(f"Robot {self.id}: movement complete. Returning to FW.")
-                    self.removeAllBags(self.movementController.destinationNode)
-                    # send robot back to FW
-                    self.movementController.setDestination(self.fm.fw) 
+                currOrder = self.movementController.currentTargetOrder
+
+                if currOrder and self.position == currOrder.getDestination():
+                    print(f"Robot {self.id}: movement complete to {self.position.name}.")
+                    self.removeAllBags(self.movementController.destinationNode, currOrder)
+                    # target the next destination
+                    self.movementController.targetNextDestination()
                 elif self.position == self.fm.fw:
+                    # returned to FW
                     print(f"Robot {self.id} returned to FW")
                     self.fm.completeOrder(self.id) # notify FleetManager order is complete
-
-                    if self.battery < 30:
-                        print(f"Robot {self.id} began charging.")
-                        self.status = "charging"
-                    else:
-                        self.status = 'ready'
+                else:
+                    self.removeAllBags(self.movementController.destinationNode)
+                    self.movementController.targetNextDestination()
                     
             elif movementStatus == "FAIL":
                 self.status = "error"
@@ -112,8 +115,6 @@ class Robot:
                 if self.battery <= 0:
                     print(f"Error: robot {self.id} battery died.")
                     self.status = "dead"
-                return # do nothing
-            
         elif self.status == "ready":
             print(f"Robot {self.id}: ready")
 
@@ -122,3 +123,4 @@ class Robot:
             self.chargeBattery(5)
             if self.battery >= 100:
                 self.status = "ready"
+

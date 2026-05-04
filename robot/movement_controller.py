@@ -9,9 +9,64 @@ class Movement_Controller:
         self.distanceTravelled = 0
         self.destinationNode = None
         self.currentPath = None
+        self.activeItinerary = []
+        self.currentTargetOrder = None
 
-    # TODO we will need to adjust pathplanner to plan for multiple order deliveries in a single robot
-    # for now assume one delivery per robot to test simulation and Robot classes
+    def setItinerary(self, orders):
+        # called by FM
+        self.activeItinerary = self.optimizeItinerary(orders)
+
+        self.targetNextDestination()
+
+    def optimizeItinerary(self, orders):
+        # Used AI tools to help implement the code for a greedy nearest-neighbor algorithm to optimize an order 
+        # itinerary
+        unvisited = orders[:]
+        currentNode = self.robot.getPosition()
+        optimizedQueue = []
+        
+        while unvisited:
+            bestOrder = None
+            bestCost = float('inf')
+
+            for order in unvisited:
+                # A* to find path
+                path = self.planner.calculate_path(currentNode, order.getDestination())
+
+                cost = float('inf')
+                if path:
+                    cost = self.planner.calculatePathCost(path)
+
+                if cost < bestCost:
+                    bestCost = cost
+                    bestOrder = order
+
+            if not bestOrder:
+                print("Warning: some destinations are not visitable")
+                break
+            optimizedQueue.append(bestOrder)
+            currentNode = bestOrder.getDestination() # assume navigated to this path
+            unvisited.remove(bestOrder)
+        return optimizedQueue
+
+    def targetNextDestination(self):
+        if not self.activeItinerary:
+            # send back to FW
+            self.currentTargetOrder = None
+            self.destinationNode = self.robot.fm.fw
+        else:
+            # goto next order in the queue
+            self.currentTargetOrder = self.activeItinerary.pop(0)
+            self.destinationNode = self.currentTargetOrder.getDestination()
+
+        path = self.planner.calculate_path(self.robot.getPosition(), self.destinationNode)
+
+        if not path:
+            print(f"Error: robot {self.robot.getID()} failed to find a path to {self.destinationNode.name}")
+            return False
+        
+        print(f"Robot {self.robot.getID()} targeting next path to {self.destinationNode.name}")
+        return True
 
     def getDestination(self):
         return self.destinationNode
@@ -47,7 +102,7 @@ class Movement_Controller:
             if e.isPassable: # new obstacle - passability not yet updated
                 e.setPassibility(False)
                 foundNewObstacles = True
-                print(f"Robot {self.robot.getID()} sensed a new obstacle.")
+                print(f"Robot {self.robot.getID()}: sensed a new obstacle.")
                 # TODO can report back to the Fleet Manager to trigger other Robots to check path for this new edge
                 # to update before they discover the obstacle in their path
 
@@ -69,12 +124,10 @@ class Movement_Controller:
 
             self.robot.position = nextNode
             self.distanceTravelled += 1
-            print(f"Robot {self.robot.getID()} moved to Node {nextNode.name}")
+            print(f"Robot {self.robot.getID()}: moved to Node {nextNode.name}")
 
         if self.robot.position == self.destinationNode:
             # arrived at destination
             print(f"Robot {self.robot.getID()} arrived at destination {self.destinationNode.name}")
-            #self.destinationNode == None
             return "COMPLETE"
-        
         return "MOVING"

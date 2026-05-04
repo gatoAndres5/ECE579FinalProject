@@ -58,3 +58,18 @@ class PathPlanner:
 
         self.current_path = []
         return []
+    
+    def calculatePathCost(self, path):
+        if not path or len(path) < 2:
+            return 0
+            
+        total_cost = 0
+        for i in range(len(path) - 1):
+            current_node = path[i]
+            next_node = path[i + 1]
+            for edge in current_node.edges:
+                if edge.destNode == next_node:
+                    total_cost += edge.cost
+                    break
+                    
+        return total_cost

@@ -10,6 +10,7 @@ from routing.edge import Edge
 from routing.environment_graph import EnvironmentGraph
 from bagging.foodie_bagger import Foodie_Bagger
 from routing.path_planner import PathPlanner
+from obstacle.obstacle import Obstacle
 
 # Fleet Manager 
 
@@ -39,6 +40,36 @@ def build_graph():
     e8 = Edge(8, 1, b, c, True)
 
     edges = [e1, e2, e3, e4, e5, e6, e7, e8]
+
+    for edge in edges:
+        graph.addEdge(edge)
+
+    return graph, nodes, edges
+
+def build_graph2():
+    graph = EnvironmentGraph()
+
+    # Nodes
+    fw = Node(1, "FW", 0, 0)
+    a = Node(2, "A", 1, 0)
+    b = Node(3, "B", 2, 0)
+
+    nodes = [fw, a, b]
+
+    for node in nodes:
+        graph.addNode(node)
+
+    # Edges (directed)
+    e1 = Edge(1, 1, fw, a, True)
+    e2 = Edge(2, 1, a, b, True)
+
+    e3 = Edge(3, 1, a, fw, True)
+    e4 = Edge(4, 1, b, a, True)
+
+    e5 = Edge(5, 10, fw, b, True)
+    e6 = Edge(6, 10, b, fw, True)
+
+    edges = [e1, e2, e3, e4, e5, e6]
 
     for edge in edges:
         graph.addEdge(edge)
@@ -198,7 +229,7 @@ def test_move():
     assert robot.getCurrentOrder() == order
     assert len(robot.bags) == 2
     assert robot.getBattery() == 100
-    assert fm.calculatePathCost([fw, a]) == 1
+    assert pathplanner.calculatePathCost([fw, a]) == 1
 
     assert robot.getPosition() == fw
     assert robot.movementController.setDestination(a)
@@ -338,8 +369,68 @@ def dead():
     robot.battery = 0
     robot.tick()
     assert robot.getStatus() == "dead"
+    assert robot.getPosition() == a
 
+# in main simulation loop, all robots should call tick() to synchronize in time
 
-# TODO if robots at foodiewarehouse and low battery below some point
-# set status to charging
-# in main simulation loop, all robots should call tick() 
+def test_multiple_orders():
+    # 1. Setup the World
+    eg, n, e = build_graph2()
+    fw = n[0]
+    a = n[1]  # distance FW -> A is 1
+    b = n[2]  # distance A -> B is 1, but FW -> B is 10
+    
+    true_obstacles = None 
+    pathplanner = PathPlanner(eg)
+    fm = Fleet_Manager(fw, eg, true_obstacles, pathplanner)
+
+    items_A = [Item(1, "apple", "small")]
+    items_B = [Item(2, "heavy box", "large")]
+    
+    order_A = Order(1, a, items_A)
+    order_B = Order(2, b, items_B)
+    
+    bagger = Foodie_Bagger(fw)
+    bags_A = bagger.bagOrder(order_A)
+    bags_B = bagger.bagOrder(order_B)
+
+    robot = Robot(fm, 1, fw, eg, true_obstacles)
+    fm.addRobot(robot)
+
+    for bag in bags_A + bags_B:
+        robot.addBag(bag, fw)
+        
+    assert len(robot.bags) == len(bags_A) + len(bags_B)
+    robot.status = 'busy' 
+
+    # A should be targeted first, since B is further
+    robot.movementController.setItinerary([order_B, order_A])
+    assert robot.movementController.currentTargetOrder == order_A
+    assert robot.movementController.activeItinerary == [order_B]
+
+    robot.tick()
+    assert robot.getPosition() == a
+    # should have unloaded order A's bags
+    assert len(robot.bags) == len(bags_B)
+    assert all(bag in robot.bags for bag in bags_B)
+    assert all(bag not in robot.bags for bag in bags_A)
+    assert robot.movementController.currentTargetOrder == order_B
+
+   
+    robot.tick()
+    assert robot.getPosition() == b
+    assert len(robot.bags) == 0
+    # itinerary should be empty, triggering the return trip
+    assert robot.movementController.currentTargetOrder is None
+    assert robot.movementController.destinationNode == fw
+
+    robot.tick()
+    # move to A, shorter path
+    assert robot.getPosition() == a
+    assert robot.getBattery() < 100 
+
+    robot.tick()
+    assert robot.getPosition() == fw
+    
+    assert robot.status in ['ready', 'charging']
+
