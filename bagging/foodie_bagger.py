@@ -19,15 +19,15 @@ class Foodie_Bagger:
         small_items = [i for i in items if i.getSize() == 'small']
 
         if large_items:
-            print("Rule R1 says: Bag large items.")
+            print("Rule R1 says: Bag large items first.")
             for item in large_items:
                 self.bagItem(item, order)
         if medium_items:
-            print("Rule R2 says: Bag medium items.")
+            print("Rule R2 says: Bag medium items after large.")
             for item in medium_items:
                 self.bagItem(item, order)
         if small_items:
-            print("Rule R3 says: Bag small items.")
+            print("Rule R3 says: Bag small items after large and medium.")
             for item in small_items:
                 self.bagItem(item, order)
 
@@ -38,11 +38,11 @@ class Foodie_Bagger:
             for i in self.bags[b].getItems():
                 print(f"{count}. {i.getName()}")
                 count += 1
-        return self.bags;
+        return self.bags
 
     def bagItem(self, item, order):
         if item.isFrozen():
-            print(f"Rule R4 says: Put {item.name} in a freezer bag.")
+            print(f"Rule R4 says: Item {item.name} is frozen, put in a freezer bag.")
         if item.isFragile():
             print(f"Rule R5 says: {item.name} is fragile, do not mix with heavy items.")
 

@@ -24,7 +24,7 @@ class Bag:
             
         if item.isFragile() and self.contains_heavy:
             return False
-        if self.contains_fragile and item.getSize() == 'large':
+        if self.contains_fragile and item.isHeavy():
             return False
             
         return True
@@ -34,7 +34,8 @@ class Bag:
         self.current_weight += item.getWeight()
         if item.isFragile():
             self.contains_fragile = True
-        if item.getSize() == 'large':
+        if item.isHeavy():
+            print("+++++++++++++++++++++++++++++++++++++++++++")
             self.contains_heavy = True
 
     def getItems(self):
