@@ -35,7 +35,6 @@ class Bag:
         if item.isFragile():
             self.contains_fragile = True
         if item.isHeavy():
-            print("+++++++++++++++++++++++++++++++++++++++++++")
             self.contains_heavy = True
 
     def getItems(self):
