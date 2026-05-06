@@ -1,6 +1,3 @@
-Yes — here’s an updated shorter `README.md` that includes the `simulation_outputs/` directory and makes Simulation B match the actual file you showed.
-
-````md
 # ECE579 Final Project
 
 This project implements a small FOODIE robot delivery system for ECE 579.
