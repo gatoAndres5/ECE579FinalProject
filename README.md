@@ -87,6 +87,7 @@ Expected behavior:
 * The simulation prints a trace of the bagging process.
 
 ## Run Tests
+The tests in the `testing/` directory are unit tests that were created while developing the individual modules of the system. They are mainly used to verify that core components such as routing, obstacles, orders, robots, and bagging behave correctly in isolation.
 
 Run all tests:
 
