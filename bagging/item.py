@@ -1,7 +1,7 @@
 class Item:
     def __init__(self, itemID, name, size, frozen=False, fragile=False, heavy=False):
         self.itemID = itemID
-        self.name = f"{name} ({size})"
+        self.name = f"{name}"
         self.size = size  # string: 'large', 'medium', 'small'
         self.frozen = frozen 
         self.fragile = fragile
