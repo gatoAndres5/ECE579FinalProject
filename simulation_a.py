@@ -337,7 +337,7 @@ def run_simulation():
 
         print(f"Robot {robot.getID()} final position: {robot.getPosition().name}")
         print(f"Robot {robot.getID()} distance traveled: {distance}")
-        print(f"Robot {robot.getID()} estimated energy used: {battery_used}")
+        print(f"Robot {robot.getID()} estimated battery used: {battery_used}")
 
 
 if __name__ == "__main__":
