@@ -216,7 +216,7 @@ def test_move():
 
     items1 = [
         Item(1, "fragile item", "small", fragile=True),
-        Item(2, "heavy item", "large")
+        Item(2, "heavy item", "large", heavy=True)
     ]
     order = Order(1, a, items1)
     bagger = Foodie_Bagger(fw)

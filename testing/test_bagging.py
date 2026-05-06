@@ -66,7 +66,7 @@ def test_capacity_limit():
 def test_fragile_and_heavy():
     items = [
         Item(1, "fragile item", "small", fragile=True),
-        Item(2, "heavy item", "large")
+        Item(2, "heavy item", "large", heavy=True)
     ]
     order = Order(1, "A", items)
     fw = Node(1, "FW", 0, 0)

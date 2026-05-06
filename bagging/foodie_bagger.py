@@ -19,34 +19,36 @@ class Foodie_Bagger:
         small_items = [i for i in items if i.getSize() == 'small']
 
         if large_items:
-            print("Rule R_large says: Bag large items.")
+            print("Rule R1 says: Bag large items first.")
             for item in large_items:
                 self.bagItem(item, order)
         if medium_items:
-            print("Rule R_medium says: Bag medium items.")
+            print("Rule R2 says: Bag medium items after large.")
             for item in medium_items:
                 self.bagItem(item, order)
         if small_items:
-            print("Rule R_small says: Bag small items.")
+            print("Rule R3 says: Bag small items after large and medium.")
             for item in small_items:
                 self.bagItem(item, order)
 
         print("Order bags: ")
         for b in range(len(self.bags)):
-            print(f"Bag {b}: ")
+            print(f"Bag {b}, {self.bags[b].getBagType()}: ")
+            count = 1
             for i in self.bags[b].getItems():
-                print(f"{i.getName()}")
-        return self.bags;
+                print(f"{count}. {i.getName()}")
+                count += 1
+        return self.bags
 
     def bagItem(self, item, order):
         if item.isFrozen():
-            print(f"Rule R_freezer says: Put {item.name} in a freezer bag.")
+            print(f"Rule R4 says: Item {item.name} is frozen, put in a freezer bag.")
         if item.isFragile():
-            print(f"Rule R_fragile says: {item.name} is fragile, do not mix with heavy items.")
+            print(f"Rule R5 says: {item.name} is fragile, do not mix with heavy items.")
 
         target_bag = self.findBag(item, order)
         target_bag.addItem(item)
-        print(f"Rule R_add says: Put {item.name} in {target_bag.bagID}.")
+        print(f"Rule R6 says: Put {item.name} in {target_bag.bagID}.")
 
     def findBag(self, item, order):
         # try to find an existing bag
@@ -54,7 +56,7 @@ class Foodie_Bagger:
             if bag.can_fit(item):
                 return bag
         
-        print(f"Rule R_new says: Start a new bag.")
+        print(f"Rule R7 says: Start a new bag. Item cannot fit in any existing bag.")
         bag_type = "freezer" if item.isFrozen() else "paper"
         new_bag = Bag(f"bag_{self.next_bag_id}", self.fw_loc, order, bagType=bag_type)
         self.bags.append(new_bag)
