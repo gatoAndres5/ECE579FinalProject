@@ -21,6 +21,7 @@ testing/              # Pytest test files
 simulation_outputs/   # Saved graph outputs from Simulation A
 
 simulation_a.py       # Route optimization simulation
+simulation_a_part2.py # Route optimization simulation
 simulation_b.py       # Rule-based bagging simulation
 requirements.txt
 README.md
