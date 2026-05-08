@@ -218,7 +218,7 @@ def run_simulation():
         Obstacle(1, blocked_edge)
     ]
 
-    fleet_manager = Fleet_Manager(fw, graph, true_obstacles, planner)
+    fleet_manager = Fleet_Manager(fw, graph, true_obstacles, planner, multiple_order=True)
 
     # robots
     robot1 = Robot(fleet_manager, 0, fw, graph, true_obstacles)
@@ -230,6 +230,8 @@ def run_simulation():
     orders = [
         Order(1, c),
         Order(2, d),
+        Order(3, e),
+        Order(4, a)
     ]
 
     order_manager = OrderManager(orders, [], [])
@@ -253,28 +255,26 @@ def run_simulation():
 
     total_orders = len(orders)
 
-    for step in range(12):
+    for step in range(16):
         print(f"\n--- Step {step} ---")
 
         # Dispatch available orders to available robots
-        while fleet_manager.hasAvailableRobot():
+        if fleet_manager.hasAvailableRobot():
             order = order_manager.dispatchOrder()
 
-            if order is None:
-                break
+            if order is not None: 
+                bags = create_route_only_bags(get_order_id(order), count=1)
+                robot = fleet_manager.dispatchOrder(order, bags)
 
-            bags = create_route_only_bags(get_order_id(order), count=1)
-            robot = fleet_manager.dispatchOrder(order, bags)
-
-            if robot is not None:
-                dispatched_orders[robot.getID()] = order
-                print(
-                    f"Order {get_order_id(order)} dispatched to Robot {robot.getID()} "
-                    f"with destination {order.getDestination().name}."
-                )
-            else:
-                print(f"Order {get_order_id(order)} could not be dispatched.")
-                break
+                if robot is not None:
+                    dispatched_orders[robot.getID()] = order
+                    print(
+                        f"Order {get_order_id(order)} dispatched to Robot {robot.getID()} "
+                        f"with destination {order.getDestination().name}."
+                    )
+                else:
+                    print(f"Order {get_order_id(order)} could not be dispatched.")
+                    break
 
         # Tick each robot once
         for robot in fleet_manager.robots:
@@ -298,10 +298,10 @@ def run_simulation():
 
                 if current_position == destination:
                     if previous_order not in order_manager.completedOrders:
-                        #print(
-                        #    f"Robot {robot.getID()}: delivered Order "
-                        #    f"{get_order_id(previous_order)} to {destination.name}."
-                        #)
+                        print(
+                            f"Robot {robot.getID()}: delivered Order "
+                            f"{get_order_id(previous_order)} to {destination.name}."
+                        )
                         order_manager.markComplete(previous_order)
 
             if previous_status != current_status:

@@ -60,6 +60,23 @@ Expected behavior:
 * The simulation prints completed orders, distance traveled, and estimated battery used.
 * Graph images may be saved in `simulation_outputs/`.
 
+Simulation A part two demonstrates the ability of one robot to schedule and deliver multiple orders.
+
+Expected behavior:
+* Robot 0 is assigned Order 1 through 4
+* Robot 0 delivers Order 4 to `A`
+* Robot 0 detects a blocked edge `B_C`.
+* Robot 0 replans through `D` and `E`.
+* Robot 0 delivers Order 2 to `D`
+* Robot 0 delivers Order 3 to `E`
+* Robot 0 delivers Order 1 to `C`
+* The simulation prints completed orders, distance traveled, and estimated battery used.
+* Graph images may be saved in `simulation_outputs/`.
+
+```bash
+python simulation_a_part2.py
+```
+
 ## Run Simulation B
 
 Simulation B demonstrates the FOODIE_BAGGER rule-based bagging system.
