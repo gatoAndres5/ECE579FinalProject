@@ -10,7 +10,7 @@ class Robot:
         self.bags = []
         self.position = initial_location
         self.orders = []
-        self.currentOrder = None
+        #self.currentOrder = None
         self.status = "ready"
         self.eg = environment_graph
         self.movementController = Movement_Controller(self, environment_graph, true_obstacles)
@@ -18,11 +18,14 @@ class Robot:
         self.maxCapacity = 6 # max number of bags
         self.movementStatus = None
         self.battery = 100 # start fully charged
+        self.dispatchTicks = 0 # for when orders are not given simultaneously
+        self.dispatchTimeout = 5 # timeout and dispatch after waiting this period
 
     def assignOrder(self, order):
         self.orders.append(order)
-        self.currentOrder = order
-        self.status = "assigned"
+        if self.status == "ready":
+            self.status = "assigned"
+            self.dispatchTicks = 0
 
     def setDestination(self, destination):
         self.movementController.setDestination(destination)
@@ -56,7 +59,7 @@ class Robot:
         return
 
     def completeOrder(self):
-        self.currentOrder = None
+        #self.currentOrder = None
 
         if self.battery < 30:
             print(f"Robot {self.id} began charging.")
@@ -117,6 +120,7 @@ class Robot:
                 if self.battery <= 0:
                     print(f"Error: robot {self.id} battery died.")
                     self.status = "dead"
+
         elif self.status == "ready":
             print(f"Robot {self.id}: ready")
 
@@ -126,6 +130,24 @@ class Robot:
             if self.battery >= 100:
                 self.status = "ready"
 
+        elif self.status == "assigned":
+            print(f"Robot {self.id}: waiting for more orders"
+                  f"({self.dispatchTicks}/{self.dispatchTimeout})")
+            self.dispatchTicks += 1
+            
+            # if compartment at capacity, dispatch
+            if len(self.bags) >= self.maxCapacity:
+                self.dispatch()
+            # if past timeout, dispatch
+            elif self.dispatchTicks >= self.dispatchTimeout:
+                self.dispatch()
+
     def dispatch(self):
+        if not self.orders:
+            print(f"Error: Robot {self.id} cannot dispatch with no order")
+
         self.movementController.setItinerary(self.orders)
         self.status = "busy"
+        self.dispatchTicks = 0
+
+        print(f"Robot {self.id}: dispatched with {len(self.orders)} order(s)")
