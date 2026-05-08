@@ -1,6 +1,6 @@
 from order.order import Order
 from order.destination import Destination
-from order.item import Item
+from bagging.item import Item
 from order.order_manager import OrderManager
 
 
@@ -24,10 +24,10 @@ def test_destination_coordinates():
 
 
 def test_item_properties():
-    item = Item(1, 100, "Ice Cream", "SMALL", True, False)
+    item = Item(1, "Ice Cream", size="small", frozen=True, fragile=False)
     assert item.isFrozen() is True
     assert item.isFragile() is False
-    assert item.getSize() == "SMALL"
+    assert item.getSize() == "small"
 
 
 def test_order_manager_dispatch_and_complete():

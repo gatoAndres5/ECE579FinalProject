@@ -9,8 +9,6 @@ class Fleet_Manager:
         self.eg = environment_graph
         self.true_obstacles = true_obstacles
         self.planner = path_planner
-        # TODO would like to not pass true_obstacles, but modify ObstacleManager to return whether there is truly an
-        # obstacle when sense() is called
 
     def addRobot(self, robot=None):
         if robot is not None:
@@ -35,12 +33,10 @@ class Fleet_Manager:
 
     # dispatch an order, given bags from FoodieBagger
     def dispatchOrder(self, order, bags):
-        # dispatch to first available robot
-        
         if not bags:
             print(f"Error: attempting to dispatch order with no bags.")
             return
-
+        # dispatch to first available robot
         r = None
         for robot in self.robots:
             if robot.getStatus() == "ready":
@@ -84,7 +80,6 @@ class Fleet_Manager:
 
         # dispatch robot
         r.setDestination(order.getDestination())
-
         return r
 
     def completeOrder(self, robotID):
@@ -92,8 +87,3 @@ class Fleet_Manager:
             if robot.id == robotID:
                 robot.completeOrder()
                 break
-
-    # TODO multiple orders
-    # check capacity - can these orders fit
-    # but don't want to assign and keep a robot waiting
-    # given a set of orders (in ordermanager) how to optimize which orders go to which robot

@@ -5,7 +5,7 @@ class Movement_Controller:
     def __init__(self, robot, environment_graph, true_obstacles):
         self.robot = robot
         self.planner = PathPlanner(environment_graph) # each needs own pathPlanner since PP stores a single path
-        self.obstacleSensor = ObstacleDetection(obstacles=true_obstacles) # TODO need to pass true list of obstacles
+        self.obstacleSensor = ObstacleDetection(obstacles=true_obstacles)
         self.distanceTravelled = 0
         self.destinationNode = None
         self.currentPath = None
@@ -13,9 +13,7 @@ class Movement_Controller:
         self.currentTargetOrder = None
 
     def setItinerary(self, orders):
-        # called by FM
         self.activeItinerary = self.optimizeItinerary(orders)
-
         self.targetNextDestination()
 
     def optimizeItinerary(self, orders):
@@ -65,7 +63,7 @@ class Movement_Controller:
             print(f"Error: robot {self.robot.getID()} failed to find a path to {self.destinationNode.name}")
             return False
         
-        print(f"Robot {self.robot.getID()} targeting next path to {self.destinationNode.name}")
+        print(f"Robot {self.robot.getID()}: targeting next path to {self.destinationNode.name}")
         return True
 
     def getDestination(self):
@@ -103,8 +101,6 @@ class Movement_Controller:
                 e.setPassibility(False)
                 foundNewObstacles = True
                 print(f"Robot {self.robot.getID()}: sensed a new obstacle.")
-                # TODO can report back to the Fleet Manager to trigger other Robots to check path for this new edge
-                # to update before they discover the obstacle in their path
 
         if foundNewObstacles:
             print(f"Robot {self.robot.getID()} recalculating path...")
@@ -128,6 +124,6 @@ class Movement_Controller:
 
         if self.robot.position == self.destinationNode:
             # arrived at destination
-            print(f"Robot {self.robot.getID()} arrived at destination {self.destinationNode.name}")
+            print(f"Robot {self.robot.getID()}: arrived at destination {self.destinationNode.name}")
             return "COMPLETE"
         return "MOVING"

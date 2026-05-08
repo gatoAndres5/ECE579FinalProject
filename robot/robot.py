@@ -102,7 +102,7 @@ class Robot:
                     self.movementController.targetNextDestination()
                 elif self.position == self.fm.fw:
                     # returned to FW
-                    print(f"Robot {self.id} returned to FW")
+                    print(f"Robot {self.id}: returned to FW")
                     self.fm.completeOrder(self.id) # notify FleetManager order is complete
                 else:
                     self.removeAllBags(self.movementController.destinationNode)

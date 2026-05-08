@@ -23,12 +23,12 @@ bagger = Foodie_Bagger(fw)
 print(f"Order: ")
 for i in order.getItems():
     print(
-    f"{i.getName():<25}  "
+    f"{i.getName():<20}  "
     f"size: {str(i.getSize()):<6}  "
-    f"frozen: {str(i.isFrozen()):<6}  "
-    f"fragile: {str(i.isFragile()):<6}  "
+    f"frozen: {str(i.isFrozen()):<5}  "
+    f"fragile: {str(i.isFragile()):<5}  "
     f"heavy: {str(i.isHeavy()):<6}"
 )
 
-print(f"Bagging simulation:")
+print(f"\nBagging simulation:")
 bagger.bagOrder(order)

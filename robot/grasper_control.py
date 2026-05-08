@@ -1,4 +1,3 @@
-
 class Grasper_Control:
     def __init__(self, robot): 
         self.robot = robot
@@ -11,14 +10,12 @@ class Grasper_Control:
         if (not self.handEmpty):
             print("Error: hand not empty")
             return
-        #if (item.getPosition() != itemPosition):
-        #    print("Error: item not at expected location");
         self.moveTo(itemPosition)
         self.closeGrasper()
         self.itemHeld = item
         self.handEmpty = False
 
-        print(f"Robot {self.robot.getID()}: Picked up {item.getName()}")
+        print(f"Robot {self.robot.getID()}: picked up {item.getName()}")
 
     def putDown(self, destination):
         if (self.handEmpty):

@@ -289,7 +289,7 @@ def run_simulation():
 
             if previous_position != current_position:
                 print(
-                    f"Robot {robot.getID()} moved from "
+                    f"Robot {robot.getID()}: moved from "
                     f"{previous_position.name} to {current_position.name}."
                 )
 
@@ -299,14 +299,14 @@ def run_simulation():
                 if current_position == destination:
                     if previous_order not in order_manager.completedOrders:
                         print(
-                            f"Robot {robot.getID()} delivered Order "
+                            f"Robot {robot.getID()}: delivered Order "
                             f"{get_order_id(previous_order)} to {destination.name}."
                         )
                         order_manager.markComplete(previous_order)
 
             if previous_status != current_status:
                 print(
-                    f"Robot {robot.getID()} status changed from "
+                    f"Robot {robot.getID()}: status changed from "
                     f"{previous_status} to {current_status}."
                 )
 
