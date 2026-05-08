@@ -103,6 +103,7 @@ class Robot:
                 if currOrder and self.position == currOrder.getDestination():
                     print(f"Robot {self.id}: movement complete to {self.position.name}.")
                     self.removeAllBags(self.movementController.destinationNode, currOrder)
+                    print(f"Robot {self.id}: delivered Order {currOrder.orderId} to {self.position.name}")
                     # target the next destination
                     self.movementController.targetNextDestination()
                 elif self.position == self.fm.fw:
