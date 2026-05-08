@@ -2,13 +2,14 @@ from robot.robot import Robot
 from routing.path_planner import PathPlanner
 
 class Fleet_Manager:
-    def __init__(self, fw, environment_graph, true_obstacles, path_planner):
+    def __init__(self, fw, environment_graph, true_obstacles, path_planner, multiple_order=False):
         self.robots = []
         self.nextRobotID = 0 # next robot added will have this ID
         self.fw = fw
         self.eg = environment_graph
         self.true_obstacles = true_obstacles
         self.planner = path_planner
+        self.multiple_order = multiple_order
 
     def addRobot(self, robot=None):
         if robot is not None:
@@ -78,10 +79,11 @@ class Fleet_Manager:
             for b in bags:
                 r.addBag(b, r.getPosition())
 
-        # dispatch robot
-        r.setDestination(order.getDestination())
-
-        r.dispatch() # will eventually call at timeout (tick)
+        # dispatch robot immediately if only one order allowed per robot
+        if not self.multiple_order:
+            r.setDestination(order.getDestination())
+            r.dispatch() 
+        # else continue to wait for more compatible orders until timeout
         
         return r
 
