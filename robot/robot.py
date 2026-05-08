@@ -9,6 +9,7 @@ class Robot:
         self.id = robotID
         self.bags = []
         self.position = initial_location
+        self.orders = []
         self.currentOrder = None
         self.status = "ready"
         self.eg = environment_graph
@@ -19,14 +20,15 @@ class Robot:
         self.battery = 100 # start fully charged
 
     def assignOrder(self, order):
+        self.orders.append(order)
         self.currentOrder = order
-        self.status = "busy"
+        self.status = "assigned"
 
     def setDestination(self, destination):
         self.movementController.setDestination(destination)
 
     def getCurrentOrder(self):
-        return self.currentOrder;
+        return self.movementController.currentTargetOrder;
 
     def addBag(self, bag, location):
         if (len(self.bags) >= self.maxCapacity):
@@ -124,3 +126,6 @@ class Robot:
             if self.battery >= 100:
                 self.status = "ready"
 
+    def dispatch(self):
+        self.movementController.setItinerary(self.orders)
+        self.status = "busy"

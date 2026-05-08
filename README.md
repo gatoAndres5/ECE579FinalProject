@@ -60,6 +60,12 @@ Expected behavior:
 * The simulation prints completed orders, distance traveled, and estimated battery used.
 * Graph images may be saved in `simulation_outputs/`.
 
+Simulation A part two demonstrates one robot delivering multiple orders.
+
+```bash
+python simulation_a_part2.py
+```
+
 ## Run Simulation B
 
 Simulation B demonstrates the FOODIE_BAGGER rule-based bagging system.

@@ -39,7 +39,7 @@ class Fleet_Manager:
         # dispatch to first available robot
         r = None
         for robot in self.robots:
-            if robot.getStatus() == "ready":
+            if robot.getStatus() == "ready" or robot.getStatus() == "assigned":
                 destination = order.getDestination()
                 path_out = self.planner.calculate_path(self.fw, destination)
                 if not path_out:
@@ -80,6 +80,9 @@ class Fleet_Manager:
 
         # dispatch robot
         r.setDestination(order.getDestination())
+
+        r.dispatch() # will eventually call at timeout (tick)
+        
         return r
 
     def completeOrder(self, robotID):

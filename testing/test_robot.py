@@ -404,7 +404,7 @@ def test_multiple_orders():
     robot.status = 'busy' 
 
     # A should be targeted first, since B is further
-    robot.movementController.setItinerary([order_B, order_A])
+    robot.movementController.setItinerary([order_B, order_A]) # See this line!
     assert robot.movementController.currentTargetOrder == order_A
     assert robot.movementController.activeItinerary == [order_B]
 
