@@ -158,13 +158,13 @@ def test_all_assigned():
     fm.dispatchOrder(order1, bags1)
     fm.dispatchOrder(order2, bags2)
 
-    assert fm.robots[0].getStatus() == "assigned"
+    assert fm.robots[0].getStatus() == "busy"
     fm.robots[0].dispatch()
     o1 = fm.robots[0].getCurrentOrder()
     assert o1 == order1
     assert o1.getDestination() == a
 
-    assert fm.robots[1].getStatus() == "assigned"
+    assert fm.robots[1].getStatus() == "busy"
     fm.robots[1].dispatch()
     o2 = fm.robots[1].getCurrentOrder();
     assert o2 == order2
