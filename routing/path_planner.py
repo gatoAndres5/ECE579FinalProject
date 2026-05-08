@@ -1,6 +1,5 @@
 import heapq
 
-
 class PathPlanner:
     def __init__(self, environment_graph, destinations=None):
         self.environment_graph = environment_graph

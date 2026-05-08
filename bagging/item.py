@@ -8,7 +8,6 @@ class Item:
         self.heavy = heavy
 
     def getWeight(self):
-        # can adjust weights later if needed
         if self.size == 'large': return 5
         if self.size == 'medium': return 3
         if self.size == 'small': return 1

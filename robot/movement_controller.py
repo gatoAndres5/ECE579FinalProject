@@ -13,9 +13,7 @@ class Movement_Controller:
         self.currentTargetOrder = None
 
     def setItinerary(self, orders):
-        # called by FM
         self.activeItinerary = self.optimizeItinerary(orders)
-
         self.targetNextDestination()
 
     def optimizeItinerary(self, orders):

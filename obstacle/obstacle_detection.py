@@ -1,4 +1,5 @@
 from collections import deque
+
 class ObstacleDetection:
     def __init__(self, obstacles=None, sensorRange=0):
         if obstacles:

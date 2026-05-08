@@ -1,6 +1,6 @@
 import random
-
 from obstacle.obstacle import Obstacle
+
 class ObstacleManager:
     def __init__(self, spawnRate, obstacles=None):
         self.spawnRate = spawnRate

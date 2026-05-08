@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class Order:
     def __init__(self, orderId, destination, items=None):
         self.orderId = orderId

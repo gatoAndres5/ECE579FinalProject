@@ -33,12 +33,10 @@ class Fleet_Manager:
 
     # dispatch an order, given bags from FoodieBagger
     def dispatchOrder(self, order, bags):
-        # dispatch to first available robot
-        
         if not bags:
             print(f"Error: attempting to dispatch order with no bags.")
             return
-
+        # dispatch to first available robot
         r = None
         for robot in self.robots:
             if robot.getStatus() == "ready":
@@ -82,7 +80,6 @@ class Fleet_Manager:
 
         # dispatch robot
         r.setDestination(order.getDestination())
-
         return r
 
     def completeOrder(self, robotID):

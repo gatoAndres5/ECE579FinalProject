@@ -3,7 +3,6 @@ from routing.node import Node
 
 class Bag:
     def __init__(self, bagID, initial_location, order, bagType="paper", capacity=10):
-        # can adjust capacity of 10 as well
         self.bagID = bagID
         self.name = f"Bag {bagID}"
         self.bagType = bagType  # either "paper" or "freezer"
