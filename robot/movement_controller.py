@@ -58,6 +58,7 @@ class Movement_Controller:
             self.destinationNode = self.currentTargetOrder.getDestination()
 
         path = self.planner.calculate_path(self.robot.getPosition(), self.destinationNode)
+        self.currentPath = path 
 
         if not path:
             print(f"Error: robot {self.robot.getID()} failed to find a path to {self.destinationNode.name}")
@@ -87,7 +88,7 @@ class Movement_Controller:
     
     def step(self):
         # call once per tick. True if arrived at destination, False otherwise
-        if not self.planner.current_path and self.robot.getPosition() == self.destinationNode:
+        if not self.currentPath and self.robot.getPosition() == self.destinationNode:
             return "COMPLETE" 
         
         currentNode = self.robot.getPosition()
@@ -103,20 +104,35 @@ class Movement_Controller:
                 print(f"Robot {self.robot.getID()}: sensed a new obstacle.")
 
         if foundNewObstacles:
-            print(f"Robot {self.robot.getID()} recalculating path...")
-            newPath = self.planner.calculate_path(currentNode, self.destinationNode)
-            if not newPath:
-                print(f"Error: robot {self.robot.getID()} cannot find a new path.")
-                return "FAIL"
-            print(f"Robot {self.robot.getID()} found a new path.")
+            if len(self.activeItinerary) <= 1:
+                print(f"Robot {self.robot.getID()} recalculating path...")
+                newPath = self.planner.calculate_path(currentNode, self.destinationNode)
+                if not newPath:
+                    print(f"Error: robot {self.robot.getID()} cannot find a new path.")
+                    return "FAIL"
+                self.currentPath = newPath
+                print(f"Robot {self.robot.getID()} found a new path.")
+            else:
+                print(f"Robot {self.robot.getID()}: recalculating itinerary...")
+                remainingOrders = []
+                if self.currentTargetOrder: # has not yet reached current target
+                    remainingOrders.append(self.currentTargetOrder)
+                remainingOrders.extend(self.activeItinerary) # add remaining itinerary, which becomes orders to optimize
+                self.activeItinerary = self.optimizeItinerary(remainingOrders)
+                success = self.targetNextDestination()
+                if not success:
+                    print(f"Error: Robot {self.robot.getID()} cannot find a new itinerary.")
+                else:
+                    print(f"Robot {self.robot.getID()}: successfully re-optimized itinerary.")
+        
 
         # move one unit per step
-        if self.planner.current_path:
-            nextNode = self.planner.current_path.pop(0)
+        if self.currentPath:
+            nextNode = self.currentPath.pop(0)
 
-            if nextNode == currentNode and self.planner.current_path:
+            if nextNode == currentNode and self.currentPath:
                 # if already at the next node, move forward again
-                nextNode = self.planner.current_path.pop(0)
+                nextNode = self.currentPath.pop(0)
 
             self.robot.position = nextNode
             self.distanceTravelled += 1
