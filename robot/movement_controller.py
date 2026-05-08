@@ -118,14 +118,23 @@ class Movement_Controller:
                 if self.currentTargetOrder: # has not yet reached current target
                     remainingOrders.append(self.currentTargetOrder)
                 remainingOrders.extend(self.activeItinerary) # add remaining itinerary, which becomes orders to optimize
-                self.activeItinerary = self.optimizeItinerary(remainingOrders)
-                success = self.targetNextDestination()
-                if not success:
+
+                new_itinerary = self.optimizeItinerary(remainingOrders)
+                #success = self.targetNextDestination()
+                if not new_itinerary:
                     print(f"Error: Robot {self.robot.getID()} cannot find a new itinerary.")
                 else:
                     print(f"Robot {self.robot.getID()}: successfully re-optimized itinerary.")
-        
+                    print("Old itinerary: " + " -> ".join(
+                        [self.currentTargetOrder.getDestination().name]
+                            + [order.getDestination().name for order in self.activeItinerary]))
+                    print("New itinerary: " + " -> ".join(order.getDestination().name for order in new_itinerary))
 
+                self.currentTargetOrder = new_itinerary.pop(0)
+                self.activeItinerary = new_itinerary
+                self.destinationNode = self.currentTargetOrder.getDestination()
+                self.currentPath = self.planner.calculate_path(self.robot.getPosition(), self.destinationNode)
+        
         # move one unit per step
         if self.currentPath:
             nextNode = self.currentPath.pop(0)
