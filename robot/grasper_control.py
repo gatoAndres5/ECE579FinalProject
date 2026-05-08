@@ -18,7 +18,7 @@ class Grasper_Control:
         self.itemHeld = item
         self.handEmpty = False
 
-        print(f"Robot {self.robot.getID()}: Picked up {item.getName()}")
+        print(f"Robot {self.robot.getID()}: picked up {item.getName()}")
 
     def putDown(self, destination):
         if (self.handEmpty):

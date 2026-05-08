@@ -17,4 +17,3 @@ class Edge:
 
     def setPassibility(self, passable):
         self.isPassable = passable
-

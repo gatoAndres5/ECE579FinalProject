@@ -31,7 +31,7 @@ class Foodie_Bagger:
             for item in small_items:
                 self.bagItem(item, order)
 
-        print("Order bags: ")
+        print("\nOrder bags: ")
         for b in range(len(self.bags)):
             print(f"Bag {b}, {self.bags[b].getBagType()}: ")
             count = 1
