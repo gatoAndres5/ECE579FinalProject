@@ -255,28 +255,26 @@ def run_simulation():
 
     total_orders = len(orders)
 
-    for step in range(30):
+    for step in range(16):
         print(f"\n--- Step {step} ---")
 
         # Dispatch available orders to available robots
-        while fleet_manager.hasAvailableRobot():
+        if fleet_manager.hasAvailableRobot():
             order = order_manager.dispatchOrder()
 
-            if order is None:
-                break
+            if order is not None: 
+                bags = create_route_only_bags(get_order_id(order), count=1)
+                robot = fleet_manager.dispatchOrder(order, bags)
 
-            bags = create_route_only_bags(get_order_id(order), count=1)
-            robot = fleet_manager.dispatchOrder(order, bags)
-
-            if robot is not None:
-                dispatched_orders[robot.getID()] = order
-                print(
-                    f"Order {get_order_id(order)} dispatched to Robot {robot.getID()} "
-                    f"with destination {order.getDestination().name}."
-                )
-            else:
-                print(f"Order {get_order_id(order)} could not be dispatched.")
-                break
+                if robot is not None:
+                    dispatched_orders[robot.getID()] = order
+                    print(
+                        f"Order {get_order_id(order)} dispatched to Robot {robot.getID()} "
+                        f"with destination {order.getDestination().name}."
+                    )
+                else:
+                    print(f"Order {get_order_id(order)} could not be dispatched.")
+                    break
 
         # Tick each robot once
         for robot in fleet_manager.robots:
