@@ -158,12 +158,14 @@ def test_all_assigned():
     fm.dispatchOrder(order1, bags1)
     fm.dispatchOrder(order2, bags2)
 
-    assert fm.robots[0].getStatus() == "busy"
+    assert fm.robots[0].getStatus() == "assigned"
+    fm.robots[0].dispatch()
     o1 = fm.robots[0].getCurrentOrder()
     assert o1 == order1
     assert o1.getDestination() == a
 
-    assert fm.robots[1].getStatus() == "busy"
+    assert fm.robots[1].getStatus() == "assigned"
+    fm.robots[1].dispatch()
     o2 = fm.robots[1].getCurrentOrder();
     assert o2 == order2
     assert o2.getDestination() == b
@@ -226,6 +228,7 @@ def test_move():
     robot = Robot(fm, 1, fw, eg, true_obstacles)
     fm.addRobot(robot)
     fm.dispatchOrder(order, bags1)
+    robot.dispatch()
     assert robot.getCurrentOrder() == order
     assert len(robot.bags) == 2
     assert robot.getBattery() == 100
