@@ -218,7 +218,7 @@ def run_simulation():
         Obstacle(1, blocked_edge)
     ]
 
-    fleet_manager = Fleet_Manager(fw, graph, true_obstacles, planner)
+    fleet_manager = Fleet_Manager(fw, graph, true_obstacles, planner, multiple_order=True)
 
     # robots
     robot1 = Robot(fleet_manager, 0, fw, graph, true_obstacles)
@@ -230,8 +230,9 @@ def run_simulation():
     orders = [
         Order(1, c),
         Order(2, d),
+        Order(3, e),
+        Order(4, a)
     ]
-    order3 = Order(3, e)
 
     order_manager = OrderManager(orders, [], [])
 
@@ -254,7 +255,7 @@ def run_simulation():
 
     total_orders = len(orders)
 
-    for step in range(12):
+    for step in range(30):
         print(f"\n--- Step {step} ---")
 
         # Dispatch available orders to available robots
